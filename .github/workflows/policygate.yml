@@ -1,0 +1,24 @@
+name: PolicyGate CI
+
+on:
+  pull_request:
+    branches: [main]
+
+jobs:
+  evaluate:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    - name: Setup Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.12'
+    - name: Install dependencies
+      run: pip install -r requirements.txt
+    - name: Run PolicyGate evaluation
+      run: python -m src.cli evaluate docs/openapi.yaml --format sarif --output findings.sarif
+    - name: Upload SARIF
+      uses: github/codeql-action/upload-sarif@v3
+      if: always()
+      with:
+        sarif_file: findings.sarif
